@@ -1,14 +1,249 @@
 [
   {
-    "name": "minority_class_boost",
-    "group_col": "is_fraud",
-    "group_val": "1",
-    "cohort_type": "equality",
+    "name": "feature_1_band=(-1.115, -0.0944]",
+    "group_col": "feature_1",
+    "group_val": "(-1.115, -0.0944]",
+    "cohort_type": "range",
     "conditions": {
-      "is_fraud": 1
+      "feature_1_low": -1.115,
+      "feature_1_high": -0.0944
+    },
+    "label": 1,
+    "recall": 0.0,
+    "n_target_cases_in_test": 8
+  },
+  {
+    "name": "feature_3_band=(1.696, 5.578]",
+    "group_col": "feature_3",
+    "group_val": "(1.696, 5.578]",
+    "cohort_type": "range",
+    "conditions": {
+      "feature_3_low": 1.696,
+      "feature_3_high": 5.578
+    },
+    "label": 1,
+    "recall": 0.0,
+    "n_target_cases_in_test": 3
+  },
+  {
+    "name": "feature_3_band=(0.948, 1.696]",
+    "group_col": "feature_3",
+    "group_val": "(0.948, 1.696]",
+    "cohort_type": "range",
+    "conditions": {
+      "feature_3_low": 0.948,
+      "feature_3_high": 1.696
+    },
+    "label": 1,
+    "recall": 0.0,
+    "n_target_cases_in_test": 3
+  },
+  {
+    "name": "feature_3_band=(-0.0212, 0.948]",
+    "group_col": "feature_3",
+    "group_val": "(-0.0212, 0.948]",
+    "cohort_type": "range",
+    "conditions": {
+      "feature_3_low": -0.0212,
+      "feature_3_high": 0.948
+    },
+    "label": 1,
+    "recall": 0.0,
+    "n_target_cases_in_test": 8
+  },
+  {
+    "name": "feature_4_band=(-3.733, -0.645]",
+    "group_col": "feature_4",
+    "group_val": "(-3.733, -0.645]",
+    "cohort_type": "range",
+    "conditions": {
+      "feature_4_low": -3.733,
+      "feature_4_high": -0.645
+    },
+    "label": 1,
+    "recall": 0.0588,
+    "n_target_cases_in_test": 17
+  },
+  {
+    "name": "feature_0_band=(-3.3049999999999997, -0.672]",
+    "group_col": "feature_0",
+    "group_val": "(-3.3049999999999997, -0.672]",
+    "cohort_type": "range",
+    "conditions": {
+      "feature_0_low": -3.3049999999999997,
+      "feature_0_high": -0.672
+    },
+    "label": 1,
+    "recall": 0.1,
+    "n_target_cases_in_test": 10
+  },
+  {
+    "name": "feature_2_band=(-0.685, 0.0423]",
+    "group_col": "feature_2",
+    "group_val": "(-0.685, 0.0423]",
+    "cohort_type": "range",
+    "conditions": {
+      "feature_2_low": -0.685,
+      "feature_2_high": 0.0423
+    },
+    "label": 1,
+    "recall": 0.1111,
+    "n_target_cases_in_test": 9
+  },
+  {
+    "name": "feature_2_band=(0.725, 2.847]",
+    "group_col": "feature_2",
+    "group_val": "(0.725, 2.847]",
+    "cohort_type": "range",
+    "conditions": {
+      "feature_2_low": 0.725,
+      "feature_2_high": 2.847
+    },
+    "label": 1,
+    "recall": 0.1429,
+    "n_target_cases_in_test": 7
+  },
+  {
+    "name": "feature_4_band=(0.654, 2.939]",
+    "group_col": "feature_4",
+    "group_val": "(0.654, 2.939]",
+    "cohort_type": "range",
+    "conditions": {
+      "feature_4_low": 0.654,
+      "feature_4_high": 2.939
+    },
+    "label": 1,
+    "recall": 0.1667,
+    "n_target_cases_in_test": 6
+  },
+  {
+    "name": "feature_0_band=(0.669, 4.817]",
+    "group_col": "feature_0",
+    "group_val": "(0.669, 4.817]",
+    "cohort_type": "range",
+    "conditions": {
+      "feature_0_low": 0.669,
+      "feature_0_high": 4.817
     },
     "label": 1,
     "recall": 0.2,
-    "n_survivors_in_test": 20
+    "n_target_cases_in_test": 15
+  },
+  {
+    "name": "feature_2_band=(-2.8979999999999997, -0.685]",
+    "group_col": "feature_2",
+    "group_val": "(-2.8979999999999997, -0.685]",
+    "cohort_type": "range",
+    "conditions": {
+      "feature_2_low": -2.8979999999999997,
+      "feature_2_high": -0.685
+    },
+    "label": 1,
+    "recall": 0.2,
+    "n_target_cases_in_test": 15
+  },
+  {
+    "name": "feature_0_band=(-0.672, -0.00633]",
+    "group_col": "feature_0",
+    "group_val": "(-0.672, -0.00633]",
+    "cohort_type": "range",
+    "conditions": {
+      "feature_0_low": -0.672,
+      "feature_0_high": -0.00633
+    },
+    "label": 1,
+    "recall": 0.2222,
+    "n_target_cases_in_test": 9
+  },
+  {
+    "name": "feature_1_band=(-0.0944, 1.181]",
+    "group_col": "feature_1",
+    "group_val": "(-0.0944, 1.181]",
+    "cohort_type": "range",
+    "conditions": {
+      "feature_1_low": -0.0944,
+      "feature_1_high": 1.181
+    },
+    "label": 1,
+    "recall": 0.25,
+    "n_target_cases_in_test": 12
+  },
+  {
+    "name": "feature_1_band=(1.181, 4.641]",
+    "group_col": "feature_1",
+    "group_val": "(1.181, 4.641]",
+    "cohort_type": "range",
+    "conditions": {
+      "feature_1_low": 1.181,
+      "feature_1_high": 4.641
+    },
+    "label": 1,
+    "recall": 0.2727,
+    "n_target_cases_in_test": 22
+  },
+  {
+    "name": "feature_0_band=(-0.00633, 0.669]",
+    "group_col": "feature_0",
+    "group_val": "(-0.00633, 0.669]",
+    "cohort_type": "range",
+    "conditions": {
+      "feature_0_low": -0.00633,
+      "feature_0_high": 0.669
+    },
+    "label": 1,
+    "recall": 0.3,
+    "n_target_cases_in_test": 10
+  },
+  {
+    "name": "feature_4_band=(-0.645, 0.0171]",
+    "group_col": "feature_4",
+    "group_val": "(-0.645, 0.0171]",
+    "cohort_type": "range",
+    "conditions": {
+      "feature_4_low": -0.645,
+      "feature_4_high": 0.0171
+    },
+    "label": 1,
+    "recall": 0.3,
+    "n_target_cases_in_test": 10
+  },
+  {
+    "name": "feature_3_band=(-3.1399999999999997, -0.0212]",
+    "group_col": "feature_3",
+    "group_val": "(-3.1399999999999997, -0.0212]",
+    "cohort_type": "range",
+    "conditions": {
+      "feature_3_low": -3.1399999999999997,
+      "feature_3_high": -0.0212
+    },
+    "label": 1,
+    "recall": 0.3,
+    "n_target_cases_in_test": 30
+  },
+  {
+    "name": "feature_2_band=(0.0423, 0.725]",
+    "group_col": "feature_2",
+    "group_val": "(0.0423, 0.725]",
+    "cohort_type": "range",
+    "conditions": {
+      "feature_2_low": 0.0423,
+      "feature_2_high": 0.725
+    },
+    "label": 1,
+    "recall": 0.3077,
+    "n_target_cases_in_test": 13
+  },
+  {
+    "name": "feature_4_band=(0.0171, 0.654]",
+    "group_col": "feature_4",
+    "group_val": "(0.0171, 0.654]",
+    "cohort_type": "range",
+    "conditions": {
+      "feature_4_low": 0.0171,
+      "feature_4_high": 0.654
+    },
+    "label": 1,
+    "recall": 0.3636,
+    "n_target_cases_in_test": 11
   }
 ]

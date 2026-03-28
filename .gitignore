@@ -7,3 +7,4 @@ e2e_output.txt
 test_imbalance.py
 patch.py
 generalize_notebooks.py
+*.docx

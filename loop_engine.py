@@ -189,6 +189,101 @@ def execute_adaptive_loop(
     return best_model, metrics_history
 
 
+def execute_adaptive_loop_stream(
+    X_train: pd.DataFrame,
+    y_train: pd.Series,
+    X_test: pd.DataFrame,
+    y_test: pd.Series,
+    X_train_proc: np.ndarray,
+    X_test_proc: np.ndarray,
+    preprocessor,
+    initial_model,
+    generator,
+    cohorts_metadata: list,
+    target_col: str = "survived",
+    model_type: str = "random_forest",
+    max_iterations: int = 5,
+    n_samples_per_iter: int = 80,
+    early_stop_threshold: float = 0.001,
+    random_state: int = 42,
+):
+    """
+    Generator version of the adaptive loop for Streamlit integration.
+    Yields dicts describing the current state.
+    """
+    X_aug_raw = X_train.copy()
+    y_aug_raw = y_train.copy()
+
+    baseline_metrics = evaluate_performance(initial_model, X_test_proc, y_test, verbose=False)
+    metrics_history = [{"iteration": 0, "label": "baseline", **baseline_metrics}]
+
+    best_auc = baseline_metrics["roc_auc"]
+    best_model = initial_model
+    prev_auc = best_auc
+
+    yield {"status": "baseline", "metrics": baseline_metrics, "metrics_history": metrics_history}
+
+    for iteration in range(1, max_iterations + 1):
+        yield {"status": "generating", "iteration": iteration, "max_iterations": max_iterations}
+        
+        synthetic_df = sample_targeted_synthetic_data(
+            generator=generator,
+            real_data=pd.concat([X_aug_raw, y_aug_raw.rename(target_col)], axis=1),
+            cohorts_metadata=cohorts_metadata,
+            n_samples=n_samples_per_iter,
+            target_col=target_col,
+        )
+
+        if synthetic_df.empty:
+            yield {"status": "early_stop", "reason": "No synthetic data produced"}
+            break
+
+        real_combined = pd.concat([X_aug_raw, y_aug_raw.rename(target_col)], axis=1)
+        X_aug_df, y_aug_series = interleave_data(
+            real_combined, synthetic_df, target_col=target_col, random_state=random_state + iteration
+        )
+
+        try:
+            X_aug_proc = apply_preprocessor(X_aug_df, preprocessor)
+        except Exception as e:
+            yield {"status": "error", "message": f"Preprocessing failed: {e}"}
+            continue
+
+        yield {"status": "training", "iteration": iteration, "max_iterations": max_iterations}
+        iter_model = build_and_train_model(
+            X_aug_proc, y_aug_series.values,
+            model_type=model_type,
+            random_state=random_state + iteration,
+        )
+
+        iter_metrics = evaluate_performance(iter_model, X_test_proc, y_test, verbose=False)
+        iter_metrics["iteration"] = iteration
+        iter_metrics["label"] = f"iter_{iteration}"
+        iter_metrics["synthetic_added"] = len(synthetic_df)
+        iter_metrics["total_train_size"] = len(y_aug_series)
+        metrics_history.append(iter_metrics)
+
+        curr_auc = iter_metrics["roc_auc"]
+        delta_auc = curr_auc - prev_auc
+
+        if curr_auc > best_auc:
+            best_auc = curr_auc
+            best_model = iter_model
+
+        X_aug_raw = X_aug_df.copy()
+        y_aug_raw = y_aug_series.copy()
+
+        yield {"status": "iter_complete", "iteration": iteration, "metrics": iter_metrics, "metrics_history": list(metrics_history), "best_model": best_model}
+
+        if abs(delta_auc) < early_stop_threshold and iteration > 1:
+            yield {"status": "early_stop", "reason": f"ΔAUC ({delta_auc:+.5f}) < threshold. Best AUC: {best_auc:.4f}"}
+            break
+
+        prev_auc = curr_auc
+
+    yield {"status": "complete", "best_model": best_model, "metrics_history": metrics_history, "final_data": pd.concat([X_aug_raw, y_aug_raw.rename(target_col)], axis=1)}
+
+
 # ---------------------------------------------------------------------------
 # Logging helpers
 # ---------------------------------------------------------------------------
