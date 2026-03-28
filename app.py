@@ -118,17 +118,24 @@ def main():
         st.header("1. Configuration")
         uploaded_file = st.file_uploader("Upload CSV Dataset", type="csv")
         
-        if uploaded_file:
-            if st.session_state.df is None or st.session_state.df.empty:
-                df = pd.read_csv(uploaded_file)
-                # Auto-fill missing values
-                for col in df.columns:
-                    if df[col].dtype in [np.float64, np.int64]:
-                        df[col] = df[col].fillna(df[col].median())
-                    else:
-                        df[col] = df[col].fillna(df[col].mode()[0])
-                st.session_state.df = df
-            
+        if uploaded_file is not None:
+            # Check if this is a newly uploaded file
+            if st.session_state.get("last_uploaded") != uploaded_file.name:
+                with st.spinner("Loading dataset..."):
+                    df = pd.read_csv(uploaded_file)
+                    # Auto-fill missing values
+                    for col in df.columns:
+                        if df[col].dtype in [np.float64, np.int64]:
+                            df[col] = df[col].fillna(df[col].median())
+                        else:
+                            df[col] = df[col].fillna(df[col].mode()[0])
+                    st.session_state.df = df
+                    st.session_state.last_uploaded = uploaded_file.name
+                    # Clear run state for new files
+                    st.session_state.baseline_model = None
+                    st.session_state.cohorts = None
+
+        if st.session_state.df is not None:
             df = st.session_state.df
             
             # Target Column Selection
@@ -142,7 +149,7 @@ def main():
             st.markdown("---")
             st.header("Loop Parameters")
             max_iter = st.slider("Max Iterations", 1, 10, 5)
-            n_samples = st.number_input("Samples Per Cohort/Iter", min_value=10, max_value=1000, value=100)
+            n_samples = st.number_input("Samples Per Cohort/Iter", min_value=10, max_value=5000, value=100)
             threshold = st.number_input("Early Stop ΔAUC Threshold", value=0.001, format="%.4f")
             
             if st.button("Initialize & Train Baseline"):
