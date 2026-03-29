@@ -14,67 +14,7 @@ from sklearn.tree import DecisionTreeClassifier
 
 st.set_page_config(page_title="Adaptive Synthetic Data Engine", page_icon="🧬", layout="wide")
 
-st.markdown("""
-<style>
-    /* Dark Mode Theme & Vibrant Colors */
-    :root {
-        --primary-color: #6C5CE7;
-        --secondary-color: #00CEC9;
-        --bg-color: #0F0F1A;
-        --card-bg: #1A1A2E;
-        --text-color: #DFDFDF;
-    }
-    
-    .stApp {
-        background-color: var(--bg-color);
-        color: var(--text-color);
-        font-family: 'Inter', sans-serif;
-    }
-    
-    .stSidebar {
-        background-color: var(--card-bg) !important;
-        border-right: 1px solid #2D2D44;
-    }
-    
-    .stButton>button {
-        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 0.5rem 1rem;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
-        width: 100%;
-    }
-    
-    .stButton>button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(108, 92, 231, 0.6);
-        color: white;
-    }
 
-    [data-testid="stMetricValue"] {
-        font-size: 2.5rem;
-        font-weight: 800;
-        background: linear-gradient(to right, #00CEC9, #6C5CE7);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-
-    h1, h2, h3 {
-        color: white;
-        font-weight: 700;
-        letter-spacing: -0.5px;
-    }
-    
-    hr {
-        border-color: #2D2D44;
-    }
-    
-    .success-text { color: #00cec9; font-weight: bold; }
-</style>
-""", unsafe_allow_html=True)
 
 
 def extract_weak_cohorts(X_test, y_test, y_pred, target_col):
@@ -153,40 +93,48 @@ def main():
             threshold = st.number_input("Early Stop ΔAUC Threshold", value=0.001, format="%.4f")
             
             if st.button("Initialize & Train Baseline"):
-                with st.spinner("Preparing data and training baseline..."):
-                    # Process & Split
-                    df[target_col] = df[target_col].astype(int)
-                    X = df.drop(columns=[target_col])
-                    y = df[target_col]
-                    
-                    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
-                    
-                    # Store Raw
-                    st.session_state.X_train = X_train
-                    st.session_state.X_test = X_test
-                    st.session_state.y_train = y_train
-                    st.session_state.y_test = y_test
-                    st.session_state.target_col = target_col
-                    
-                    # Preprocess
-                    X_train_proc, X_test_proc, preprocessor, _ = preprocess_features(X_train, X_test)
-                    st.session_state.X_train_proc = X_train_proc
-                    st.session_state.X_test_proc = X_test_proc
-                    st.session_state.preprocessor = preprocessor
-                    
-                    # Baseline Model
-                    model = build_and_train_model(X_train_proc, y_train.values, model_type=model_type, random_state=42)
-                    st.session_state.baseline_model = model
-                    
-                    # Evaluate
-                    metrics = evaluate_performance(model, X_test_proc, y_test.values)
-                    st.session_state.baseline_metrics = metrics
-                    
-                    # Identify Cohorts
-                    y_pred = model.predict(X_test_proc)
-                    st.session_state.cohorts = extract_weak_cohorts(X_test, y_test.values, y_pred, target_col)
-                    
-                    st.success("Baseline training complete!")
+                pb = st.progress(0, text="Preparing data...")
+                
+                # Process & Split
+                df[target_col] = df[target_col].astype(int)
+                X = df.drop(columns=[target_col])
+                y = df[target_col]
+                                
+                pb.progress(15, text="Splitting train and test sets...")
+                X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+                
+                # Store Raw
+                st.session_state.X_train = X_train
+                st.session_state.X_test = X_test
+                st.session_state.y_train = y_train
+                st.session_state.y_test = y_test
+                st.session_state.target_col = target_col
+                
+                pb.progress(35, text="Preprocessing features...")
+                # Preprocess
+                X_train_proc, X_test_proc, preprocessor, _ = preprocess_features(X_train, X_test)
+                st.session_state.X_train_proc = X_train_proc
+                st.session_state.X_test_proc = X_test_proc
+                st.session_state.preprocessor = preprocessor
+                
+                pb.progress(60, text="Training baseline model...")
+                # Baseline Model
+                model = build_and_train_model(X_train_proc, y_train.values, model_type=model_type, random_state=42)
+                st.session_state.baseline_model = model
+                
+                pb.progress(85, text="Evaluating performance & identifying error cohorts...")
+                # Evaluate
+                metrics = evaluate_performance(model, X_test_proc, y_test.values)
+                st.session_state.baseline_metrics = metrics
+                
+                # Identify Cohorts
+                y_pred = model.predict(X_test_proc)
+                st.session_state.cohorts = extract_weak_cohorts(X_test, y_test.values, y_pred, target_col)
+                
+                pb.progress(100, text="Baseline training complete!")
+                time.sleep(1)
+                pb.empty()
+                st.success("Baseline training complete!")
 
     # Main dashboard
     if st.session_state.df is None:
@@ -230,10 +178,16 @@ def main():
             
             # Stage 1: Train Synthesizer
             if st.session_state.generator is None:
-                with st.spinner("This might take a few minutes. Generating Data Synthesizer..."):
-                    real_data = pd.concat([st.session_state.X_train, st.session_state.y_train.rename(st.session_state.target_col)], axis=1)
-                    generator = train_generator(real_data, target_col=st.session_state.target_col, generator_type='copula')
-                    st.session_state.generator = generator
+                pb_synth = st.progress(0, text="Formatting data for SDV Synthesizer...")
+                real_data = pd.concat([st.session_state.X_train, st.session_state.y_train.rename(st.session_state.target_col)], axis=1)
+                
+                pb_synth.progress(50, text="Fitting SDV Synthesizer (this might take a moment)...")
+                generator = train_generator(real_data, target_col=st.session_state.target_col, generator_type='copula')
+                st.session_state.generator = generator
+                
+                pb_synth.progress(100, text="Synthesizer ready!")
+                time.sleep(1)
+                pb_synth.empty()
             
             st.write("Starting iterations...")
             
