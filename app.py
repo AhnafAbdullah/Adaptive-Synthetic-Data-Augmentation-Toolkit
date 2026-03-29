@@ -48,13 +48,13 @@ st.markdown("""
         letter-spacing: -0.5px;
     }
     
-    .stButton > button {
+    .stButton > button, [data-testid="stFileUploader"] button {
         background-color: rgba(28, 131, 225, 0.1) !important;
         color: white !important;
         border: 1px solid rgba(28, 131, 225, 0.5) !important;
     }
     
-    .stButton > button:hover {
+    .stButton > button:hover, [data-testid="stFileUploader"] button:hover {
         background-color: rgba(28, 131, 225, 0.25) !important;
         border-color: rgba(28, 131, 225, 1.0) !important;
         color: white !important;
@@ -286,7 +286,6 @@ def main():
                     
                 elif state["status"] == "early_stop":
                     status_text.warning(f"Early Stopping Triggered: {state.get('reason', '')}")
-                    break
                     
                 elif state["status"] == "complete":
                     status_text.success("Optimization Loop Complete!")
