@@ -22,6 +22,7 @@ def train_generator(
     real_data: pd.DataFrame,
     target_col: str = "survived",
     generator_type: str = "copula",
+    max_fit_samples: int = 5000,
 ) -> object:
     """
     Fits a generative model on the full real training dataset.
@@ -35,6 +36,8 @@ def train_generator(
     generator_type : str
         "copula" → GaussianCopulaSynthesizer (default, fast)
         "tvae"   → TVAESynthesizer (slower, neural)
+    max_fit_samples : int
+        Caps the amount of rows passed to SDV for extreme performance limits.
 
     Returns
     -------
@@ -43,8 +46,13 @@ def train_generator(
     from sdv.metadata import SingleTableMetadata
     from sdv.single_table import GaussianCopulaSynthesizer, TVAESynthesizer
 
+    if len(real_data) > max_fit_samples:
+        fit_data = real_data.sample(n=max_fit_samples, random_state=42)
+    else:
+        fit_data = real_data
+
     metadata = SingleTableMetadata()
-    metadata.detect_from_dataframe(real_data)
+    metadata.detect_from_dataframe(fit_data)
 
     if generator_type == "copula":
         synthesizer = GaussianCopulaSynthesizer(metadata)
@@ -53,8 +61,8 @@ def train_generator(
     else:
         raise ValueError(f"Unknown generator_type '{generator_type}'. Use 'copula' or 'tvae'.")
 
-    synthesizer.fit(real_data)
-    print(f"[generator_utils] '{generator_type}' synthesizer fitted on {len(real_data)} rows.")
+    synthesizer.fit(fit_data)
+    print(f"[generator_utils] '{generator_type}' synthesizer fitted on {len(fit_data)} rows.")
     return synthesizer
 
 
@@ -136,10 +144,15 @@ def sample_targeted_synthetic_data(
 
         # Fit a lightweight per-cohort synthesizer
         try:
+            if len(cohort_data) > 5000:
+                fit_cohort_data = cohort_data.sample(n=5000, random_state=42)
+            else:
+                fit_cohort_data = cohort_data
+                
             meta = SingleTableMetadata()
-            meta.detect_from_dataframe(cohort_data)
+            meta.detect_from_dataframe(fit_cohort_data)
             cohort_synth = GaussianCopulaSynthesizer(meta)
-            cohort_synth.fit(cohort_data)
+            cohort_synth.fit(fit_cohort_data)
             samples = cohort_synth.sample(num_rows=actual_n)
             # Override target column with the intended label
             samples[target_col] = label
