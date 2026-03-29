@@ -220,6 +220,9 @@ def execute_adaptive_loop_stream(
     best_auc = baseline_metrics["roc_auc"]
     best_model = initial_model
     prev_auc = best_auc
+    
+    best_metrics = metrics_history[0].copy()
+    best_data = pd.concat([X_aug_raw, y_aug_raw.rename(target_col)], axis=1)
 
     yield {"status": "baseline", "metrics": baseline_metrics, "metrics_history": metrics_history}
 
@@ -269,6 +272,8 @@ def execute_adaptive_loop_stream(
         if curr_auc > best_auc:
             best_auc = curr_auc
             best_model = iter_model
+            best_metrics = iter_metrics.copy()
+            best_data = pd.concat([X_aug_df, y_aug_series.rename(target_col)], axis=1)
 
         X_aug_raw = X_aug_df.copy()
         y_aug_raw = y_aug_series.copy()
@@ -281,7 +286,7 @@ def execute_adaptive_loop_stream(
 
         prev_auc = curr_auc
 
-    yield {"status": "complete", "best_model": best_model, "metrics_history": metrics_history, "final_data": pd.concat([X_aug_raw, y_aug_raw.rename(target_col)], axis=1)}
+    yield {"status": "complete", "best_model": best_model, "best_metrics": best_metrics, "metrics_history": metrics_history, "final_data": best_data}
 
 
 # ---------------------------------------------------------------------------

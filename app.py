@@ -291,18 +291,32 @@ def main():
                     status_text.success("Optimization Loop Complete!")
                     st.session_state.final_model = state["best_model"]
                     
-                    st.markdown("### Final Comparison")
+                    st.markdown("### 🏆 Best Model Comparison")
                     base_m = metrics_acc[0]
-                    final_m = metrics_acc[-1]
+                    final_m = state.get("best_metrics", metrics_acc[-1])
+                    
+                    st.write(f"Best performance was achieved at **Iteration {final_m.get('iteration', 0)}**.")
                     
                     fm1, fm2, fm3 = st.columns(3)
-                    fm1.metric("AUC Score", f"{final_m['roc_auc']:.4f}", f"{(final_m['roc_auc'] - base_m['roc_auc']):.4f}")
-                    fm2.metric("F1-Score", f"{final_m['f1']:.4f}", f"{(final_m['f1'] - base_m['f1']):.4f}")
-                    fm3.metric("Recall", f"{final_m['recall']:.4f}", f"{(final_m['recall'] - base_m['recall']):.4f}")
+                    fm1.metric("Best AUC Score", f"{final_m['roc_auc']:.4f}", f"{(final_m['roc_auc'] - base_m['roc_auc']):.4f}")
+                    fm2.metric("Best F1-Score", f"{final_m['f1']:.4f}", f"{(final_m['f1'] - base_m['f1']):.4f}")
+                    fm3.metric("Best Recall", f"{final_m['recall']:.4f}", f"{(final_m['recall'] - base_m['recall']):.4f}")
                     
                     fm4, fm5 = st.columns(2)
-                    fm4.metric("Accuracy", f"{final_m['accuracy']:.4f}", f"{(final_m['accuracy'] - base_m['accuracy']):.4f}")
-                    fm5.metric("Precision", f"{final_m['precision']:.4f}", f"{(final_m['precision'] - base_m['precision']):.4f}")
+                    fm4.metric("Best Accuracy", f"{final_m['accuracy']:.4f}", f"{(final_m['accuracy'] - base_m['accuracy']):.4f}")
+                    fm5.metric("Best Precision", f"{final_m['precision']:.4f}", f"{(final_m['precision'] - base_m['precision']):.4f}")
+                    
+                    if "final_data" in state:
+                        st.markdown("---")
+                        st.subheader("💾 Download Optimized Dataset")
+                        best_df = state["final_data"]
+                        csv = best_df.to_csv(index=False).encode('utf-8')
+                        st.download_button(
+                            label="⬇️ Download Best Augmented CSV",
+                            data=csv,
+                            file_name="optimized_augmented_dataset.csv",
+                            mime="text/csv",
+                        )
                     
             if not st.session_state.abort:
                 st.balloons()
