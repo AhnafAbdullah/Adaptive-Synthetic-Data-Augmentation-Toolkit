@@ -47,6 +47,18 @@ st.markdown("""
         font-weight: 700;
         letter-spacing: -0.5px;
     }
+    
+    .stButton > button {
+        background-color: rgba(28, 131, 225, 0.1) !important;
+        color: white !important;
+        border: 1px solid rgba(28, 131, 225, 0.5) !important;
+    }
+    
+    .stButton > button:hover {
+        background-color: rgba(28, 131, 225, 0.25) !important;
+        border-color: rgba(28, 131, 225, 1.0) !important;
+        color: white !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -186,6 +198,9 @@ def main():
             m1.metric("AUC Score", f"{st.session_state.baseline_metrics['roc_auc']:.4f}")
             m2.metric("F1-Score", f"{st.session_state.baseline_metrics['f1']:.4f}")
             m3.metric("Recall", f"{st.session_state.baseline_metrics['recall']:.4f}")
+            m4, m5 = st.columns(2)
+            m4.metric("Accuracy", f"{st.session_state.baseline_metrics['accuracy']:.4f}")
+            m5.metric("Precision", f"{st.session_state.baseline_metrics['precision']:.4f}")
 
     if st.session_state.cohorts:
         st.markdown("---")
@@ -278,9 +293,17 @@ def main():
                     st.session_state.final_model = state["best_model"]
                     
                     st.markdown("### Final Comparison")
-                    base_auc = metrics_acc[0]['roc_auc']
-                    final_auc = metrics_acc[-1]['roc_auc']
-                    st.metric("Final AUC vs Baseline", f"{final_auc:.4f}", f"{(final_auc - base_auc):.4f}")
+                    base_m = metrics_acc[0]
+                    final_m = metrics_acc[-1]
+                    
+                    fm1, fm2, fm3 = st.columns(3)
+                    fm1.metric("AUC Score", f"{final_m['roc_auc']:.4f}", f"{(final_m['roc_auc'] - base_m['roc_auc']):.4f}")
+                    fm2.metric("F1-Score", f"{final_m['f1']:.4f}", f"{(final_m['f1'] - base_m['f1']):.4f}")
+                    fm3.metric("Recall", f"{final_m['recall']:.4f}", f"{(final_m['recall'] - base_m['recall']):.4f}")
+                    
+                    fm4, fm5 = st.columns(2)
+                    fm4.metric("Accuracy", f"{final_m['accuracy']:.4f}", f"{(final_m['accuracy'] - base_m['accuracy']):.4f}")
+                    fm5.metric("Precision", f"{final_m['precision']:.4f}", f"{(final_m['precision'] - base_m['precision']):.4f}")
                     
             if not st.session_state.abort:
                 st.balloons()
