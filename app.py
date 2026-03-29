@@ -50,14 +50,14 @@ st.markdown("""
     
     .stButton > button, [data-testid="stFileUploader"] button {
         background-color: rgba(28, 131, 225, 0.1) !important;
-        color: white !important;
+        color: #60A5FA !important;
         border: 1px solid rgba(28, 131, 225, 0.5) !important;
     }
     
     .stButton > button:hover, [data-testid="stFileUploader"] button:hover {
         background-color: rgba(28, 131, 225, 0.25) !important;
         border-color: rgba(28, 131, 225, 1.0) !important;
-        color: white !important;
+        color: #93C5FD !important;
     }
 </style>
 """, unsafe_allow_html=True)
