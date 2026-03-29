@@ -13,9 +13,42 @@ from loop_engine import execute_adaptive_loop_stream
 from sklearn.tree import DecisionTreeClassifier
 
 st.set_page_config(page_title="Adaptive Synthetic Data Engine", page_icon="🧬", layout="wide")
+st.markdown("""
+<style>
+    :root {
+        --primary-color: #6C5CE7;
+        --secondary-color: #00CEC9;
+        --bg-color: #0F0F1A;
+        --card-bg: #1A1A2E;
+        --text-color: #DFDFDF;
+    }
+    
+    .stApp {
+        background-color: var(--bg-color) !important;
+        color: var(--text-color);
+        font-family: 'Inter', sans-serif;
+    }
+    
+    [data-testid="stSidebar"] {
+        background-color: var(--card-bg) !important;
+        border-right: 1px solid #2D2D44 !important;
+    }
 
+    [data-testid="stMetricValue"] {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(to right, #00CEC9, #6C5CE7);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
 
-
+    h1, h2, h3, h4, h5, h6 {
+        color: white !important;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 def extract_weak_cohorts(X_test, y_test, y_pred, target_col):
     """Identify weak subsets to target for synthetic generation"""
@@ -228,7 +261,7 @@ def main():
                     status_text.info(f"Iteration {state['iteration']}/{state['max_iterations']}: Retraining model...")
                     
                 elif state["status"] == "iter_complete":
-                    pct = int((state["iteration"] / state["max_iterations"]) * 100)
+                    pct = int((state["iteration"] / max_iter) * 100)
                     progress_bar.progress(pct)
                     metrics_acc = state["metrics_history"]
                     
